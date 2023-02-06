@@ -1,0 +1,16 @@
+{
+    "name": "Transient.Bridge",
+    "rootNamespace": "",
+    "references": [
+        "GUID:66b7af1d11147184d8b749dea2e9cc25"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

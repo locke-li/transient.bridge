@@ -1,0 +1,16 @@
+{
+  "name": "liveitbe.transient.bridge",
+  "description": "bridging of middlewares",
+  "version": "0.1.0",
+  "unity": "2018.4",
+  "displayName": "Transient Bridge",
+  "keywords": [],
+  "dependency": {
+    "com.unity.textmeshpro": "1.4.1"
+  },
+  "repository": {
+    "url": "https://liveitbe_@bitbucket.org/liveitbe_/transient.bridge.git",
+    "type": "git"
+  },
+  "hideInEditor": false
+}
