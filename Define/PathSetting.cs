@@ -12,15 +12,21 @@ namespace Transient.Bridge {
         public static string AssetManifestPackedPath => $"{BuildStagingPath}/{AssetManifestFile}{PackExtension}";
 #endif
         public static string LuaPathStaging = "_lua_src";
-        public static string LuaPathConf = "lua";
+        public static string LuaPath = "lua";
 
-        public const string ConfPathUpdated = "conf_updated";
-        public const string ConfPath = "conf";
-        public const string ConfExt = ".bytes";
+        public static string ConfPathStaging = "conf";
+        public static string ConfPath = "conf";
+        public static string ConfExt = ".bytes";
 
         public static string PackExtension = ".pack";
         public static string PackedAssetPath => Path.Combine(Application.streamingAssetsPath, "asset");
         public static string AssetManifestPath => Path.Combine(Application.streamingAssetsPath, $"{AssetManifestFile}{PackExtension}");
         public static string AssetManifestFile => "asset_list";
+        public static string InternalRoot = "";
+        public static string ExternalRoot = "_data";
+
+        public static string InternalPath(string path) => Path.Combine(Application.streamingAssetsPath, InternalRoot, path);
+
+        public static string ExternalPath(string path) => Path.Combine(Application.persistentDataPath, ExternalRoot, path);
     }
 }
