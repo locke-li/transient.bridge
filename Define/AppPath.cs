@@ -39,7 +39,7 @@ namespace Transient.Bridge {
 
         public static string VersionInternal => InternalPath(VersionStaging);
         public static string VersionExternal => ExternalPath(VersionPersist);
-        public static string VersionOption => InternalPath(VersionOption);
+        public static string VersionOption => InternalPath(PathDefine.VersionOption);
 
         public static string PackedAsset => Path.Combine(Application.streamingAssetsPath, AssetRoot);
         public static string AssetManifest => Path.Combine(Application.streamingAssetsPath, $"{AssetManifestFile}{PackExtension}");
