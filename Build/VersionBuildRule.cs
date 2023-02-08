@@ -7,7 +7,6 @@ using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Reflection;
-using static Transient.Bridge.PathSetting;
 using System.Text.RegularExpressions;
 
 namespace Transient.Bridge {
@@ -32,11 +31,11 @@ namespace Transient.Bridge {
                 return;
             }
             var list = new List<(string, string, string[], string[], string[])>();
-            if (data) list.Add((confRepoPath + "/gen/rawdata/client", Path.Combine(Application.streamingAssetsPath, ConfPath),
+            if (data) list.Add((confRepoPath + "/gen/rawdata/client", AppPath.ConfInternal,
                 new string[] { "*.bytes" }, null, null));
             if (schema) list.Add((confRepoPath + "/gen/csharp", "Packages/NS.Bridge.Conf/gen",
                 new string[] { "*.cs" }, new string[] { "conf", "rawdata" }, null));
-            if (script) list.Add((confRepoPath + "/gen/lua", $"Assets/{ScriptPathEditor}/gen",
+            if (script) list.Add((confRepoPath + "/gen/lua", $"Assets/{PathDefine.ScriptEditor}/gen",
                 new string[] { "*.lua" }, null, new string[] { "dbstate" }));
             foreach (var (src, _, _, _, _) in list) {
                 if (!Directory.Exists(src)) {
