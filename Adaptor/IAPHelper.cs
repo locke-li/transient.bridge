@@ -11,18 +11,20 @@ namespace Transient.Bridge {
     }
 
     public class IAPHelper {
+        //WhenPurchaseDone(id, receipt, error)
+        Action<string, string, string> WhenPurchaseDone;
+
         public void SetupIAP() {
             //TODO
             var item = new List<IAPItem>();
-            SetupIAP(item, PurchaseError);
+            SetupIAP(item);
         }
 
-        //WhenPurchaseDone(id, receipt, error)
-        public void SetupIAP(List<IAPItem> item, Action<string, string, string> WhenPurchaseDone) {
+        public void SetupIAP(List<IAPItem> item) {
             //TODO
         }
 
-        public void IAPPurchase(string id) {
+        public void CompleteTransaction(string id, string receipt) {
             //TODO
         }
 
