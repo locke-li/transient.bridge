@@ -7,5 +7,6 @@ namespace Transient.Bridge {
         public static NetworkHttpBatch NetClient;
         public static AccountHelper Account;
         public static IAPHelper IAP;
+        public static VersionEntry AppEntry;
     }
 }
