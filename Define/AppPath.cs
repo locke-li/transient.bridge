@@ -13,14 +13,14 @@ namespace Transient.Bridge {
         public static string AssetManifestPacked => $"{BuildStaging}/{AssetManifestFile}{PackExtension}";
 #endif
         public static string ScriptStaging = "script";
-        public static string ScriptUpdate = "script";
+        public static string ScriptPersist = "script";
 
         public static string ConfStaging = "conf";
-        public static string ConfUpdate = "conf";
+        public static string ConfPersist = "conf";
         public static string ConfExt = ".bytes";
 
         public static string VersionStaging = "app_version.json";
-        public static string VersionUpdate = "app_version";
+        public static string VersionPersist = "app_version";
         public static string VersionOption = "app_option.json";
 
         public static string PackExtension = ".pack";
@@ -32,13 +32,13 @@ namespace Transient.Bridge {
 
     public static class AppPath {
         public static string ScriptInternal => InternalPath(ScriptStaging);
-        public static string ScriptExternal => ExternalPath(ScriptUpdate);
+        public static string ScriptExternal => ExternalPath(ScriptPersist);
 
         public static string ConfInternal => InternalPath(ConfStaging);
-        public static string ConfExternal => ExternalPath(ConfUpdate);
+        public static string ConfExternal => ExternalPath(ConfPersist);
 
         public static string VersionInternal => InternalPath(VersionStaging);
-        public static string VersionExternal => ExternalPath(VersionUpdate);
+        public static string VersionExternal => ExternalPath(VersionPersist);
         public static string VersionOption => InternalPath(VersionOption);
 
         public static string PackedAsset => Path.Combine(Application.streamingAssetsPath, AssetRoot);
