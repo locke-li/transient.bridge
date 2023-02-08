@@ -7,12 +7,12 @@ namespace Transient.Bridge {
     public static class PathSetting {
 #if UNITY_EDITOR
         public static string ManifestPrefix = "_";//should match those in graphs
-        public static string LuaPathEditor = "SrcLua";
+        public static string ScriptPathEditor = "SrcScript";
         public static string BuildStagingPath = "Assets/AssetStaging/_build";
         public static string AssetManifestPackedPath => $"{BuildStagingPath}/{AssetManifestFile}{PackExtension}";
 #endif
-        public static string LuaPathStaging = "_lua_src";
-        public static string LuaPath = "lua";
+        public static string ScriptPathStaging = "script";
+        public static string ScriptPath = "script";
 
         public static string ConfPathStaging = "conf";
         public static string ConfPath = "conf";

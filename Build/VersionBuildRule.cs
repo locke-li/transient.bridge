@@ -20,9 +20,9 @@ namespace Transient.Bridge {
 
         [MenuItem("DevShortcut/Sync Conf", priority = 1000)]
         [ExtendableTool("Sync Conf", "Build Staging", priority: 1000)]
-        public static void SyncConfAll() => SyncConf(lua: true);
+        public static void SyncConfAll() => SyncConf(script: true);
 
-        public static void SyncConf(bool data = true, bool source = true, bool lua = false) {
+        public static void SyncConf(bool data = true, bool schema = true, bool script = false) {
             var confRepoPath = string.Empty;
             foreach(var sub in Directory.EnumerateDirectories("../../")) {
                 if (sub.EndsWith("data")) confRepoPath = sub;
@@ -34,9 +34,9 @@ namespace Transient.Bridge {
             var list = new List<(string, string, string[], string[], string[])>();
             if (data) list.Add((confRepoPath + "/gen/rawdata/client", Path.Combine(Application.streamingAssetsPath, ConfPath),
                 new string[] { "*.bytes" }, null, null));
-            if (source) list.Add((confRepoPath + "/gen/csharp", "Packages/NS.Bridge.Conf/gen",
+            if (schema) list.Add((confRepoPath + "/gen/csharp", "Packages/NS.Bridge.Conf/gen",
                 new string[] { "*.cs" }, new string[] { "conf", "rawdata" }, null));
-            if (lua) list.Add((confRepoPath + "/gen/lua", $"Assets/{LuaPathEditor}/gen",
+            if (script) list.Add((confRepoPath + "/gen/lua", $"Assets/{ScriptPathEditor}/gen",
                 new string[] { "*.lua" }, null, new string[] { "dbstate" }));
             foreach (var (src, _, _, _, _) in list) {
                 if (!Directory.Exists(src)) {
