@@ -63,12 +63,20 @@ namespace Transient.Bridge {
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("DevShortcut/Clear Version Cache", priority = 1001)]
+        [MenuItem("DevShortcut/Clear Version", priority = 1001)]
         [ExtendableTool("Clear Version Cache", "Build Staging", priority: 1001)]
         public static void ClearVersionCache() => ClearVersionCache(true);
 
         public static void ClearVersionCache(bool overwrite) {
-            //TODO
+            var path = AppPath.VersionInternal;
+            var version = new AppVersion();
+            if (!overwrite) {
+                var s = File.ReadAllBytes(path);
+                version.Parse(s);
+            }
+            version.Reset(0, 0, 0);
+            var ss = version.Serialize();
+            File.WriteAllBytes(path, ss);
         }
 
         [MenuItem("DevShortcut/Reset Data Version", priority = 1002)]
