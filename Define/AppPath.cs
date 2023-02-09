@@ -19,9 +19,9 @@ namespace Transient.Bridge {
         public static string ConfPersist = "conf";
         public static string ConfExt = ".bytes";
 
-        public static string VersionStaging = "app_version.json";
+        public static string VersionStaging = "app_version.info";
         public static string VersionPersist = "app_version";
-        public static string VersionOption = "app_option.json";
+        public static string VersionOption = "app_option.info";
 
         public static string PackExtension = ".pack";
         public static string AssetRoot = "asset";

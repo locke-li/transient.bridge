@@ -63,11 +63,29 @@ namespace Transient.Bridge {
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("DevShortcut/Clear Version", priority = 1001)]
-        [ExtendableTool("Clear Version Cache", "Build Staging", priority: 1001)]
-        public static void ClearVersionCache() => ClearVersionCache(true);
+        [MenuItem("DevShortcut/Clear Option", priority = 1001)]
+        [ExtendableTool("Clear Option", "Build Staging", priority: 1001)]
+        public static void ClearOption() => ClearOption(true);
 
-        public static void ClearVersionCache(bool overwrite) {
+        public static void ClearOption(bool overwrite) {
+            var path = AppPath.VersionOption;
+            var option = new AppOption();
+            if (!overwrite) {
+                var s = File.ReadAllBytes(path);
+                option.Parse(s);
+            }
+            option.Reset();
+            //TODO set default
+            var ss = option.Serialize();
+            File.WriteAllBytes(path, ss);
+            AssetDatabase.Refresh();
+        }
+
+        [MenuItem("DevShortcut/Clear Version", priority = 1002)]
+        [ExtendableTool("Clear Version", "Build Staging", priority: 1002)]
+        public static void ClearVersion() => ClearVersion(true);
+
+        public static void ClearVersion(bool overwrite) {
             var path = AppPath.VersionInternal;
             var version = new AppVersion();
             if (!overwrite) {
@@ -77,10 +95,11 @@ namespace Transient.Bridge {
             version.Reset(0, 0, 0);
             var ss = version.Serialize();
             File.WriteAllBytes(path, ss);
+            AssetDatabase.Refresh();
         }
 
-        [MenuItem("DevShortcut/Reset Data Version", priority = 1002)]
-        [ExtendableTool("Reset Data Version", "Build Staging", priority: 1002)]
+        [MenuItem("DevShortcut/Reset Data Version", priority = 1003)]
+        [ExtendableTool("Reset Data Version", "Build Staging", priority: 1003)]
         public static void ResetDataVersion() {
             //TODO
         }
