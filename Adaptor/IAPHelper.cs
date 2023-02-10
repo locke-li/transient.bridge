@@ -12,7 +12,7 @@ namespace Transient.Bridge {
 
     public class IAPHelper {
         //WhenPurchaseDone(id, receipt, error)
-        Action<string, string, string> WhenPurchaseDone;
+        public Action<string, string, string> WhenPurchaseDone;
 
         public void SetupIAP() {
             //TODO
