@@ -8,9 +8,11 @@ namespace Transient.Bridge {
     public static class PathDefine {
 #if UNITY_EDITOR
         public static string ManifestPrefix = "_";//should match those in graphs
-        public static string ScriptEditor = "SrcScript";
+        public static string ScriptEditor = "AssetScript";
+        public static string ScriptSchema = "schema";
         public static string BuildStaging = "Assets/AssetStaging/_build";
         public static string AssetManifestPacked => $"{BuildStaging}/{AssetManifestFile}{PackExtension}";
+        public static string ProjectPath = Application.dataPath.Replace("Assets", "");
 #endif
         public static string ScriptStaging = "script";
         public static string ScriptPersist = "script";
@@ -46,5 +48,8 @@ namespace Transient.Bridge {
 
         public static string InternalPath(string path) => Path.Combine(Application.streamingAssetsPath, InternalRoot, path);
         public static string ExternalPath(string path) => Path.Combine(Application.persistentDataPath, ExternalRoot, path);
+#if UNITY_EDITOR
+        public static string ProjectPath(string path) => Path.Combine(PathDefine.ProjectPath, path);
+#endif
     }
 }

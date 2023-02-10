@@ -8,6 +8,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using static Transient.Bridge.PathDefine;
 
 namespace Transient.Bridge {
     public static class VersionBuildRule {
@@ -33,9 +34,9 @@ namespace Transient.Bridge {
             var list = new List<(string, string, string[], string[], string[])>();
             if (data) list.Add((confRepoPath + "/gen/rawdata/client", AppPath.ConfInternal,
                 new string[] { "*.bytes" }, null, null));
-            if (schema) list.Add((confRepoPath + "/gen/csharp", "Packages/NS.Bridge.Conf/gen",
+            if (schema) list.Add((confRepoPath + "/gen/csharp", $"Packages/Bridge.Schema/{ScriptSchema}",
                 new string[] { "*.cs" }, new string[] { "conf", "rawdata" }, null));
-            if (script) list.Add((confRepoPath + "/gen/lua", $"Assets/{PathDefine.ScriptEditor}/gen",
+            if (script) list.Add((confRepoPath + "/gen/lua", $"{ScriptEditor}/{ScriptSchema}",
                 new string[] { "*.lua" }, null, new string[] { "dbstate" }));
             foreach (var (src, _, _, _, _) in list) {
                 if (!Directory.Exists(src)) {
