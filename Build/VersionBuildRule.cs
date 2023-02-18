@@ -25,19 +25,19 @@ namespace Transient.Bridge {
         public static void SyncConf(bool data = true, bool schema = true, bool script = false) {
             var confRepoPath = string.Empty;
             foreach(var sub in Directory.EnumerateDirectories("../../")) {
-                if (sub.EndsWith("data")) confRepoPath = sub;
+                if (sub.EndsWith("schema")) confRepoPath = sub;
             }
             if (string.IsNullOrEmpty(confRepoPath)) {
                 Debug.LogError("failed to locate data repo");
                 return;
             }
             var list = new List<(string, string, string[], string[], string[])>();
-            if (data) list.Add((confRepoPath + "/gen/rawdata/client", AppPath.ConfInternal,
+            if (data) list.Add((confRepoPath + "/output/bytes", AppPath.ConfInternal,
                 new string[] { "*.bytes" }, null, null));
-            if (schema) list.Add((confRepoPath + "/gen/csharp", $"Packages/Bridge.Schema/{ScriptSchema}",
-                new string[] { "*.cs" }, new string[] { "conf", "rawdata" }, null));
-            if (script) list.Add((confRepoPath + "/gen/lua", $"{ScriptEditor}/{ScriptSchema}",
-                new string[] { "*.lua" }, null, new string[] { "dbstate" }));
+            if (schema) list.Add((confRepoPath + "/output/cs", $"Packages/Bridge.Schema/{ScriptSchema}",
+                new string[] { "*.cs" }, null, null));
+            if (script) list.Add((confRepoPath + "/output/lua", $"{ScriptEditor}/{ScriptSchema}",
+                new string[] { "*.lua" }, null, null));
             foreach (var (src, _, _, _, _) in list) {
                 if (!Directory.Exists(src)) {
                     Debug.LogError($"Config repo path unavailable:{src}");
