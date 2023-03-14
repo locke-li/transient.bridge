@@ -1,13 +1,11 @@
 ﻿#if UNITY_EDITOR
+using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Linq;
-using Transient;
+using System.Text;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text.RegularExpressions;
 using static Transient.Bridge.PathDefine;
 
 namespace Transient.Bridge {
@@ -17,17 +15,97 @@ namespace Transient.Bridge {
             //TODO
         }
 
-
-        [MenuItem("DevShortcut/Sync Conf", priority = 1000)]
-        [ExtendableTool("Sync Conf", "Build Staging", priority: 1000)]
-        public static void SyncConfAll() => SyncConf(script: true);
-
-        public static void SyncConf(bool data = true, bool schema = true, bool script = false) {
-            var confRepoPath = string.Empty;
-            foreach(var sub in Directory.EnumerateDirectories("../../")) {
-                if (sub.EndsWith("schema")) confRepoPath = sub;
+        private static string FindPath(string root_, string pattern_) {
+            string path = null;
+            foreach (var sub in Directory.EnumerateDirectories(root_)) {
+                if (sub.EndsWith(pattern_)) {
+                    path = Path.GetFullPath(sub);
+                    break;
+                }
             }
-            if (string.IsNullOrEmpty(confRepoPath)) {
+            if (path == null) {
+                Debug.LogError($"failed to locate path in root={root_}, pattern={pattern_}");
+            }
+            return path;
+        }
+
+        public static async Task<bool> ExternalProcess(string name, string path, params string[] args) {
+            void RedirectOutput(object sender, System.Diagnostics.DataReceivedEventArgs e) {
+                var line = e.Data;
+                if (line.Contains("|Warn")) Debug.LogWarning(line);
+                else if (line.Contains("|Error")) Debug.LogError(line);
+                else Debug.Log(line);
+            }
+            var info = new System.Diagnostics.ProcessStartInfo(path) {
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+            var builder = new StringBuilder();
+            builder.Append(name).Append(" info: ").Append(path);
+            var arg = info.ArgumentList;
+            foreach (var g in args) {
+                arg.Add(g);
+                builder.Append(' ').Append(g);
+            }
+            Debug.Log(builder.ToString());
+            var ps = System.Diagnostics.Process.Start(info);
+            ps.OutputDataReceived += RedirectOutput;
+            ps.BeginOutputReadLine();
+            var w = 0;
+            var waitMS = 500;
+            var waitCount = 20;
+            while (w < waitCount) {
+                await Task.Run(() => ps.WaitForExit(waitMS));
+                if (ps.HasExited) break;
+            }
+            if (!ps.HasExited) {
+                ps.Kill();
+                Debug.LogError($"{name} timed out ({waitMS * waitCount / 1000})");
+                return false;
+            }
+            if (ps.ExitCode != 0) {
+                Debug.LogError($"{name} exited with error {ps.ExitCode}");
+                return false;
+            }
+            Debug.Log($"{name} exited");
+            return true;
+        }
+
+        [ExtendableTool("Build", "DesignData", priority: 1001)]
+        private static void DesignDataBuild()
+            => Task.Run(() => DesignDataBuildAsync());
+
+        private static async Task<bool> DesignDataBuildAsync() {
+            var toolExe = "SchemaFlow" + (AppEnv.IsPlatformUnix ? string.Empty : ".exe");
+            var toolPath = "../../schemaflow";
+            var path = Path.Combine(toolPath, toolExe);
+            if (!File.Exists(path)) {
+                toolPath = FindPath("../../../", "schemaflow");
+                if (toolPath == null) {
+                    Debug.LogError("failed to locate tool repo");
+                    return false;
+                }
+                path = Path.Combine(toolPath, "SchemaFlow/bin/Release/net7.0", toolExe);
+                if (!File.Exists(path)) {
+                    Debug.LogError($"failed to locate {path}");
+                    return false;
+                }
+            }
+            var confRepoPath = FindPath("../../", "schema");
+            if (confRepoPath == null) {
+                Debug.LogError("failed to locate data repo");
+                return false;
+            }
+            return await ExternalProcess(toolExe, path, "build", confRepoPath);
+        }
+
+        [ExtendableTool("Copy", "DesignData", priority: 1002)]
+        public static void DesignDataCopyAll() => DesignDataCopy(data: true, schema: true, script: true);
+
+        public static void DesignDataCopy(bool data = true, bool schema = true, bool script = false) {
+            var confRepoPath = FindPath("../../", "schema");
+            if (confRepoPath == null) {
                 Debug.LogError("failed to locate data repo");
                 return;
             }
@@ -64,8 +142,18 @@ namespace Transient.Bridge {
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("DevShortcut/Clear Option", priority = 1001)]
-        [ExtendableTool("Clear Option", "Build Staging", priority: 1001)]
+        [MenuItem("DevShortcut/Sync DesignData", priority = 1000)]
+        [ExtendableTool("Sync", "DesignData", priority: 1000)]
+        private static void DesignDataSync()
+            => Task.Run(DesignDataSyncAsync);
+        private static async void DesignDataSyncAsync() {
+            var r = await DesignDataBuildAsync();
+            if (!r) return;
+            DesignDataCopyAll();
+        }
+
+        [MenuItem("DevShortcut/Reset Option", priority = 1100)]
+        [ExtendableTool("Reset Option", "Build Staging", priority: 1100)]
         public static void ClearOption() => ClearOption(true);
 
         public static void ClearOption(bool overwrite) {
@@ -82,8 +170,8 @@ namespace Transient.Bridge {
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("DevShortcut/Clear Version", priority = 1002)]
-        [ExtendableTool("Clear Version", "Build Staging", priority: 1002)]
+        [MenuItem("DevShortcut/Reset Version", priority = 1102)]
+        [ExtendableTool("Reset Version", "Build Staging", priority: 1102)]
         public static void ClearVersion() => ClearVersion(true);
 
         public static void ClearVersion(bool overwrite) {
@@ -99,8 +187,8 @@ namespace Transient.Bridge {
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("DevShortcut/Reset Data Version", priority = 1003)]
-        [ExtendableTool("Reset Data Version", "Build Staging", priority: 1003)]
+        [MenuItem("DevShortcut/Reset Version\\Data", priority = 1103)]
+        [ExtendableTool("Reset Version\\Data", "Build Staging", priority: 1103)]
         public static void ResetDataVersion() {
             //TODO
         }
