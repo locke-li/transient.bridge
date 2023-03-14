@@ -29,6 +29,17 @@ namespace Transient.Bridge {
             return path;
         }
 
+        private static string FindFile(string root_, string pattern_, string file_) {
+            var path = FindPath(root_, pattern_);
+            if (path == null) return null;
+            path = Path.Combine(path, file_);
+            if (!File.Exists(path)) {
+                Debug.LogError($"failed to locate {path}");
+                return null;
+            }
+            return path;
+        }
+
         public static async Task<bool> ExternalProcess(string name, string path, params string[] args) {
             void RedirectOutput(object sender, System.Diagnostics.DataReceivedEventArgs e) {
                 var line = e.Data;
@@ -40,6 +51,7 @@ namespace Transient.Bridge {
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
+                CreateNoWindow = true,
             };
             var builder = new StringBuilder();
             builder.Append(name).Append(" info: ").Append(path);
@@ -77,27 +89,17 @@ namespace Transient.Bridge {
             => Task.Run(() => DesignDataBuildAsync());
 
         private static async Task<bool> DesignDataBuildAsync() {
-            var toolExe = "SchemaFlow" + (AppEnv.IsPlatformUnix ? string.Empty : ".exe");
-            var toolPath = "../../schemaflow";
-            var path = Path.Combine(toolPath, toolExe);
-            if (!File.Exists(path)) {
-                toolPath = FindPath("../../../", "schemaflow");
-                if (toolPath == null) {
-                    Debug.LogError("failed to locate tool repo");
-                    return false;
-                }
-                path = Path.Combine(toolPath, "SchemaFlow/bin/Release/net7.0", toolExe);
-                if (!File.Exists(path)) {
-                    Debug.LogError($"failed to locate {path}");
-                    return false;
-                }
-            }
+            var name = "SchemaFlow";
+            var ext = AppEnv.IsPlatformUnix ? string.Empty : ".exe";
+            var toolExe = $"{name}{ext}";
+            var file = Path.Combine($"{name}/bin/Release/net7.0", toolExe);
+            var toolPath = FindFile("../../../", "schemaflow", file);
+            if (toolPath == null) return false;
             var confRepoPath = FindPath("../../", "schema");
-            if (confRepoPath == null) {
-                Debug.LogError("failed to locate data repo");
-                return false;
-            }
-            return await ExternalProcess(toolExe, path, "build", confRepoPath);
+            if (confRepoPath == null) return false;
+            var protocPath = FindFile("../../../", "protobuf", $"bin/protoc{ext}");
+            if (protocPath == null) return false;
+            return await ExternalProcess(name, toolPath, "build", confRepoPath, protocPath);
         }
 
         [ExtendableTool("Copy", "DesignData", priority: 1002)]
