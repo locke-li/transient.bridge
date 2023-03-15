@@ -15,7 +15,7 @@ namespace Transient.Bridge {
             //TODO
         }
 
-        private static string FindPath(string root_, string pattern_) {
+        private static string FindPath(string root_, string pattern_, bool log_ = true) {
             string path = null;
             foreach (var sub in Directory.EnumerateDirectories(root_)) {
                 if (sub.EndsWith(pattern_)) {
@@ -23,18 +23,18 @@ namespace Transient.Bridge {
                     break;
                 }
             }
-            if (path == null) {
+            if (path == null && log_) {
                 Debug.LogError($"failed to locate path in root={root_}, pattern={pattern_}");
             }
             return path;
         }
 
-        private static string FindFile(string root_, string pattern_, string file_) {
-            var path = FindPath(root_, pattern_);
+        private static string FindFile(string root_, string pattern_, string file_, bool log_ = true) {
+            var path = FindPath(root_, pattern_, log_);
             if (path == null) return null;
             path = Path.Combine(path, file_);
             if (!File.Exists(path)) {
-                Debug.LogError($"failed to locate {path}");
+                if (log_) Debug.LogError($"failed to locate {path}");
                 return null;
             }
             return path;
@@ -57,6 +57,7 @@ namespace Transient.Bridge {
             builder.Append(name).Append(" info: ").Append(path);
             var arg = info.ArgumentList;
             foreach (var g in args) {
+                if (g == null) continue;
                 arg.Add(g);
                 builder.Append(' ').Append(g);
             }
@@ -97,8 +98,7 @@ namespace Transient.Bridge {
             if (toolPath == null) return false;
             var confRepoPath = FindPath("../../", "schema");
             if (confRepoPath == null) return false;
-            var protocPath = FindFile("../../../", "protobuf", $"bin/protoc{ext}");
-            if (protocPath == null) return false;
+            var protocPath = FindFile("../../../", "protobuf", $"bin/protoc{ext}", log_: false);
             return await ExternalProcess(name, toolPath, "build", confRepoPath, protocPath);
         }
 
