@@ -15,7 +15,7 @@ namespace Transient.Bridge {
             //TODO
         }
 
-        private static string FindPath(string root_, string pattern_, bool log_ = true) {
+        public static string FindPath(string root_, string pattern_, bool log_ = true) {
             string path = null;
             foreach (var sub in Directory.EnumerateDirectories(root_)) {
                 if (sub.EndsWith(pattern_)) {
@@ -29,7 +29,7 @@ namespace Transient.Bridge {
             return path;
         }
 
-        private static string FindFile(string root_, string pattern_, string file_, bool log_ = true) {
+        public static string FindFile(string root_, string pattern_, string file_, bool log_ = true) {
             var path = FindPath(root_, pattern_, log_);
             if (path == null) return null;
             path = Path.Combine(path, file_);
@@ -103,9 +103,9 @@ namespace Transient.Bridge {
         }
 
         [ExtendableTool("Copy", "DesignData", priority: 1002)]
-        public static void DesignDataCopyAll() => DesignDataCopy(data: true, schema: true, script: true);
+        public static void DesignDataCopyAll() => DesignDataCopy(data: true, schema: true);
 
-        public static void DesignDataCopy(bool data = true, bool schema = true, bool script = false) {
+        public static void DesignDataCopy(bool data = true, bool schema = true) {
             var confRepoPath = FindPath("../../", "schema");
             if (confRepoPath == null) {
                 Debug.LogError("failed to locate data repo");
@@ -116,38 +116,19 @@ namespace Transient.Bridge {
                 new string[] { "*.bytes" }, null, null));
             if (schema) list.Add((confRepoPath + "/output/cs", $"Packages/Bridge.Schema/{ScriptSchema}",
                 new string[] { "*.cs" }, null, null));
-            if (script) list.Add((confRepoPath + "/output/lua", $"{ScriptEditor}/{ScriptSchema}",
-                new string[] { "*.lua" }, null, null));
             foreach (var (src, _, _, _, _) in list) {
                 if (!Directory.Exists(src)) {
                     Debug.LogError($"Config repo path unavailable:{src}");
                     return;
                 }
             }
-            foreach (var (srcRoot, dstRoot, pattern, white, black) in list) {
-                if (Directory.Exists(dstRoot)) Directory.Delete(dstRoot, true);
-                Directory.CreateDirectory(dstRoot);
-                var srcDir = new DirectoryInfo(srcRoot);
-                foreach (var sub in white ?? srcDir.EnumerateDirectories().Select(d => d.Name)) {
-                    if (black != null && black.Any(p => sub.Contains(p))) continue;
-                    var src = Path.Combine(srcRoot, sub);
-                    var dst = Path.Combine(dstRoot, sub);
-                    Debug.Log($"{src} -> {dst}");
-                    FileUtility.CopyDirectory(src, dst, pattern);
-                }
-                foreach (var p in pattern) {
-                    foreach (var file in srcDir.EnumerateFiles(p)) {
-                        file.CopyTo(Path.Combine(dstRoot, $"{file.Name}"), true);
-                    }
-                }
-            }
+            FileUtility.SyncFile(list);
             AssetDatabase.Refresh();
         }
 
         [MenuItem("DevShortcut/Sync DesignData", priority = 1000)]
         [ExtendableTool("Sync", "DesignData", priority: 1000)]
-        private static void DesignDataSync()
-            => Task.Run(DesignDataSyncAsync);
+        private static void DesignDataSync() => Task.Run(DesignDataSyncAsync);
         private static async void DesignDataSyncAsync() {
             var r = await DesignDataBuildAsync();
             if (!r) return;
