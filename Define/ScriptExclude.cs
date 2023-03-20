@@ -1,7 +1,7 @@
 using System;
 
 namespace Transient.Bridge {
-    public class LuaExclude : Attribute {
+    public class ScriptExclude : Attribute {
         
     }
 }
