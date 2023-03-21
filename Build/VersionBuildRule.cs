@@ -64,7 +64,9 @@ namespace Transient.Bridge {
             Debug.Log(builder.ToString());
             var ps = System.Diagnostics.Process.Start(info);
             ps.OutputDataReceived += RedirectOutput;
+            ps.ErrorDataReceived += RedirectOutput;
             ps.BeginOutputReadLine();
+            ps.BeginErrorReadLine();
             var w = 0;
             var waitMS = 500;
             var waitCount = 20;
@@ -85,21 +87,40 @@ namespace Transient.Bridge {
             return true;
         }
 
-        [ExtendableTool("Build", "DesignData", priority: 1001)]
-        private static void DesignDataBuild()
-            => Task.Run(() => DesignDataBuildAsync());
-
-        private static async Task<bool> DesignDataBuildAsync() {
+        public static (string, string, string, string) FindTool() {
             var name = "SchemaFlow";
             var ext = AppEnv.IsPlatformUnix ? string.Empty : ".exe";
             var toolExe = $"{name}{ext}";
             var file = Path.Combine($"{name}/bin/Release/net7.0", toolExe);
             var toolPath = FindFile("../../../", "schemaflow", file);
-            if (toolPath == null) return false;
+            if (toolPath == null) return default;
             var confRepoPath = FindPath("../../", "schema");
-            if (confRepoPath == null) return false;
+            if (confRepoPath == null) return default;
             var protocPath = FindFile("../../../", "protobuf", $"bin/protoc{ext}", log_: false);
+            return (name, toolPath, confRepoPath, protocPath);
+        }
+
+        [ExtendableTool("Build", "DesignData", priority: 1001)]
+        private static void DesignDataBuild()
+            => Task.Run(() => DesignDataBuildAsync());
+
+        private static async Task<bool> DesignDataBuildAsync() {
+            var (name, toolPath, confRepoPath, protocPath) = FindTool();
+            if (name == null) return false;
             return await ExternalProcess(name, toolPath, "build", confRepoPath, protocPath);
+        }
+
+        [ExtendableTool("Protocol", "DesignData", priority: 1010)]
+        private static void DesignProtocolBuild()
+            => Task.Run(() => DesignProtocolBuildAsync());
+
+        private static async Task<bool> DesignProtocolBuildAsync() {
+            var (name, toolPath, confRepoPath, protocPath) = FindTool();
+            if (name == null) return false;
+            var input = $"{confRepoPath}/proto";
+            var output = $"{confRepoPath}/output/cs/protocol";
+            var ignore = $"/service|/server";
+            return await ExternalProcess(name, toolPath, "compile", input, output, ignore, protocPath);
         }
 
         [ExtendableTool("Copy", "DesignData", priority: 1002)]
