@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace Transient.Bridge {
     public static class EnvAccess  {
-        public static VersionEntry AppEntry;
-        public static NetworkHttpBatch NetClient;
-        public static AccountHelper Account;
-        public static IAPHelper IAP;
-        public static TrackingHelper DataTracking;
+        public static VersionEntry EnvVersion;
+        public static NetworkHttpBatch EnvHttp;
+        public static AccountHelper EnvAccount;
+        public static IAPHelper EnvIAP;
+        public static TrackingHelper EnvTracking;
     }
 }

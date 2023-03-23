@@ -41,6 +41,10 @@ namespace Transient.Bridge {
             WhenLoginDone(true);
         }
 
+        public void Logout() {
+            //TODO
+        }
+
         public void Bind(string info, Action<bool> WhenBind) {
             //TODO
             WhenBind(true);
